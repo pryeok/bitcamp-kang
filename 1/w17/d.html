@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+</head>
+<body>
+
+
+<script>
+
+    fetch('http://localhost:5555/w17/1team.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            // makeList(data)
+        })
+
+</script>
+</body>
+</html>

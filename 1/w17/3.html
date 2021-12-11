@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+    .menuDiv{
+        display: flex;
+        margin: 1vw;
+        justify-content: space-between;
+    }
+    .menuDiv > a{
+        text-decoration: none;
+        font-size : large;
+        background-color: #66cccc;
+        color : white;
+        border-radius: 3px;
+        padding: 10px;
+    }
+</style>
+
+
+<div id="map" style="width:100vw;height:50vh;"></div>
+<div id="result"></div>
+
+
+<!--<div class="menuDiv">
+    <a href="">전체</a>
+    <a href="">카레</a>
+    <a href="">일식</a>
+</div>-->
+
+
+<div calss="menuDiv">
+    <button onclick="loadData('http://localhost:5555/w17/1team.json')">1팀</button>
+    <button onclick="loadData('http://localhost:5555/w17/2team.json')">2팀</button>
+    <button onclick="loadData('http://localhost:5555/w17/3team.json')">3팀</button>
+</div>
+
+<ul class="storeList" >
+
+
+</ul>
+
+
+<script>
+
+
+    //데이터 가져오기
+    function loadData(serverInfo){
+
+        fetch(serverInfo)
+            .then(  response => response.json())
+            .then(  data => {
+                //console.log(data)
+                makeList(data)
+            })
+    }
+
+    //JSON 데이터 쪼개기
+    function makeList(arr){
+        const ulEle = document.querySelector(".storeList")
+        let str = ''
+
+        for (let i = 0; i < arr.length; i++) {
+            str += `<li data-name="${arr[i].name}" data-lat="${arr[i].lat}" data-lng="${arr[i].lng}"  data-thumb="${arr[i].thumb}">${arr[i].name}</li>`
+        }
+        document.querySelector(".storeList").innerHTML=str
+
+    }
+    document.querySelector(".storeList").addEventListener("click",(e)=>{
+        e.preventDefault()
+        e.stopPropagation()
+        const target = e.target
+
+        if(target.tagName !== 'LI'){
+            return
+        }
+        //console.log(target)
+        const name = target.getAttribute("data-name")
+        const lat = target.getAttribute("data-lat")
+        const lng = target.getAttribute("data-lng")
+        const thumb = target.getAttribute("data-thumb")
+
+
+        showMarkers(target)
+
+    },false)
+
+
+
+</script>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=eeb8aac23e9ee3ef23b63b56c243c13e"></script>
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+        mapOption = {
+            center: new kakao.maps.LatLng(37.540764, 126.8730055), // 지도의 중심좌표
+            level: 10 // 지도의 확대 레벨
+        };
+
+    // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+</script>
+
+<script>
+
+    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+
+        // 클릭한 위도, 경도 정보를 가져옵니다
+        var latlng = mouseEvent.latLng;
+
+        var message = '클릭한 위치의 위도는 ' + latlng.getLat() + ' 이고, ';
+        message += '경도는 ' + latlng.getLng() + ' 입니다';
+
+        var resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = message;
+
+    });
+
+
+    // 마커를 클릭했을 때 마커 위에 표시할 인포윈도우를 생성합니다
+
+    // 인포윈도우를 생성합니다
+
+
+    const markerArr = []
+    function showMarkers(store){
+        //기존 마커들은 지워야 한다.
+        for (let i = 0; i < markerArr.length; i++) {
+            markerArr[i].setMap(null)
+
+
+        }
+        console.log(store.getAttribute("data-thumb"))
+
+
+        const latLng = new kakao.maps.LatLng(store.getAttribute("data-lat"), store.getAttribute("data-lng"));
+        const marker = new kakao.maps.Marker({
+            map:map,
+            position: latLng,
+            title: store.getAttribute("data-name")
+        })
+
+
+
+        const iwContent = `<img src="${store.getAttribute("data-thumb")}"width="200px" height="200px" ">`, // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+            iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+
+
+        const infowindow = new kakao.maps.InfoWindow({
+            content : iwContent,
+            removable : iwRemoveable
+        })
+
+
+        infowindow.open(map, marker)
+        markerArr.push(marker)
+
+        console.log(infowindow)
+
+    }
+
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
